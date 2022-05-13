@@ -88,7 +88,6 @@ PolgonRemoverComponent::PolgonRemoverComponent(const rclcpp::NodeOptions & optio
     auto p_x = static_cast<float>(polygon_vertices_.at(i));
     auto p_y = static_cast<float>(polygon_vertices_.at(i + 1));
     polygon_->points.emplace_back(make_point(p_x, p_y, 0.0F));
-    std::cout << "point_x: " << polygon_->points[i/2].x << std::endl;
   }
   this->update_polygon(polygon_);
 }
@@ -205,9 +204,6 @@ sensor_msgs::msg::PointCloud2 PolgonRemoverComponent::remove_polygon_cgal_from_c
       p.z = *iter_z;
       pcl_output.emplace_back(p);
     }
-    // else{
-    //   std::cout << "#";
-    // }
   }
   pcl::toROSMsg(pcl_output, output);
   output.header = cloud_in_ptr->header;
