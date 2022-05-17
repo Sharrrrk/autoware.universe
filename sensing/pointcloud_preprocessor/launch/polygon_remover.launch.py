@@ -1,34 +1,28 @@
 import launch
-from launch.actions import DeclareLaunchArgument
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 
+import os
+import yaml
+from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     ns = "pointcloud_preprocessor"
     pkg = "pointcloud_preprocessor"
 
-    # declare launch arguments
-    input_points_raw_list_param = DeclareLaunchArgument(
-        "input_points_raw_list", default_value="/sensing/lidar/top/rectified/pointcloud"
-    )
+    param_file = os.path.join(get_package_share_directory("tier4_perception_launch"), 
+        "config/object_recognition/polygon_remover/polygon_remover.yaml")
+    with open(param_file, "r") as f:
+        polygon_remover_param = yaml.safe_load(f)["/**"]["ros__parameters"]
 
-    output_points_raw_param = DeclareLaunchArgument(
-        "output_points_raw", default_value="/pointcloud/polgon_removed"
-    )
-
-    # set crop box filter as a component
     my_component = ComposableNode(
         package=pkg,
         plugin="pointcloud_preprocessor::PolgonRemoverComponent",
         name="polgon_remover",
         parameters=[
             {
-                "polygon_vertices":[0.0,  0.0,
-                                    10.0, 0.0,
-                                    0.0,  10.0,
-                                    10.0, 10.0],
-                "will_visualize": True
+                "polygon_vertices": polygon_remover_param["polygon_vertices"],
+                "will_visualize": polygon_remover_param["will_visualize"],
             }
         ],
     )
@@ -45,8 +39,6 @@ def generate_launch_description():
 
     return launch.LaunchDescription(
         [
-            input_points_raw_list_param,
-            output_points_raw_param,
             container,
         ]
     )
